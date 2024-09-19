@@ -1,7 +1,7 @@
+import pytest
 from main import BooksCollector
 
-# класс TestBooksCollector объединяет набор тестов, которыми мы покрываем наше приложение BooksCollector
-# обязательно указывать префикс Test
+
 class TestBooksCollector:
     def test_add_new_book_add_two_books(self):
         collector = BooksCollector()
@@ -9,15 +9,38 @@ class TestBooksCollector:
         collector.add_new_book('Что делать, если ваш кот хочет вас убить')
         assert len(collector.get_books_genre()) == 2
 
-    def test_add_new_book_lenght_name_more_41(self):
-        collector = BooksCollector()
-        collector.add_new_book('Алиса в Стране Чудес, Или Странствие в Странную Страну по страницам престранной пространной истории')
-        assert len(collector.get_books_genre()) == 0
-
     def test_add_new_book_empty_name(self):
         collector = BooksCollector()
         collector.add_new_book('')
         assert len(collector.get_books_genre()) == 0
+
+    @pytest.mark.parametrize(
+        'name',
+        [
+            'Я',
+            'Мы',
+            'Гарри Поттер и Дары смерти',
+            'Перекресток одиночества-4: Часть вторая',
+            'Фантастические звери и места их обитания'
+        ]
+    )
+    def test_add_new_book_check_valid_lenght_name(self, name):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        assert name in collector.get_books_genre()
+
+    @pytest.mark.parametrize(
+        'name',
+        [
+            'Дело Чести, или Семь дней из жизни принца',
+            'Урок первый: Не проклинай своего директора',
+            'Алиса в Стране Чудес, Или Странствие в Странную Страну по страницам престранной пространной истории'
+        ]
+    )
+    def test_add_new_book_check_invalid_lenght_name(self, name):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        assert name not in collector.get_books_genre()
 
     def test_set_book_genre(self):
         collector = BooksCollector()
@@ -34,21 +57,21 @@ class TestBooksCollector:
         collector = BooksCollector()
         collector.add_new_book('Приключения Шерлока Холмса')
         collector.set_book_genre('Приключения Шерлока Холмса', 'Детективы')
-        collector.add_new_book('Сияние')
-        collector.set_book_genre('Сияние', 'Ужасы')
         detectives_books = collector.get_books_with_specific_genre('Детективы')
-        horror_books = collector.get_books_with_specific_genre('Ужасы')
         assert detectives_books == ['Приключения Шерлока Холмса']
-        assert horror_books == ['Сияние']
 
     def test_get_books_for_chilgren(self):
         collector = BooksCollector()
         collector.add_new_book('Гарри Поттер и Философский камень')
         collector.set_book_genre('Гарри Поттер и Философский камень', 'Фантастика')
-        collector.add_new_book('Кладбище домашних животных')
-        collector.set_book_genre('Кладбище домашних животных', 'Ужасы')
         children_books = collector.get_books_for_children()
         assert children_books == ['Гарри Поттер и Философский камень']
+
+    def test_genre_horror_not_for_children(self):
+        collector = BooksCollector()
+        collector.add_new_book('Кладбище домашних животных')
+        collector.set_book_genre('Кладбище домашних животных', 'Ужасы')
+        assert 'Кладбище домашних животных' not in collector.get_books_for_children()
 
     def test_add_book_in_favorites(self):
         collector = BooksCollector()
